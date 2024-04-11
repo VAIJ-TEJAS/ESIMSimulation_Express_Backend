@@ -28,7 +28,7 @@ const io = new Server(httpsServer, {
 
 // Separate app for PeerJS
 const peerApp = express();
-const peerServer = createServer(peerApp);
+const peerServer = https.createServer(credentials, peerApp);
 const peerPort = 9000; // Different port for PeerJS
 
 // PeerJS server
