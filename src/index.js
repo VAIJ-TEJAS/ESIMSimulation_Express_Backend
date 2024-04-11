@@ -3,14 +3,24 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import { ExpressPeerServer } from "peer";
 import fs from 'fs';
-import http from 'http';
 import https from "https"
 import cors from "cors";
 
 // App for Socket.IO
 const app = express();
 const server = createServer(app);
-const io = new Server(server, {
+
+// Specify the paths to your SSL certificate and private key
+const privateKey = fs.readFileSync('private.key', 'utf8');
+const certificate = fs.readFileSync('certificate.crt', 'utf8');
+const ca = fs.readFileSync('ca_bundle.crt', 'utf8');
+
+const credentials = { key: privateKey, cert: certificate, ca: ca };
+
+// Create an HTTPS server
+const httpsServer = https.createServer(credentials, app);
+
+const io = new Server(httpsServer, {
   cors: {
     origin: "*",
   },
@@ -106,9 +116,9 @@ io.on("connection", (socket) => {
   }
 });
 
-const PORT = process.env.PORT || 80;
+const PORT = process.env.PORT || 443;
 
-server.listen(PORT, "0.0.0.0", () => {
+httpsServer.listen(PORT, "0.0.0.0", () => {
   console.log(`Socket.IO Server running on port ${PORT}`);
 });
 
