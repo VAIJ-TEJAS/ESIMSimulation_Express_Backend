@@ -2,6 +2,9 @@ import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import { ExpressPeerServer } from "peer";
+import fs from 'fs';
+import http from 'http';
+import https from "https"
 import cors from "cors";
 
 // App for Socket.IO
@@ -28,6 +31,20 @@ peerApp.use("/peerjs", peerExpressServer);
 
 // CORS middleware
 app.use(cors());
+
+app.get('/.well-known/pki-validation/FC86BE2EB996E27F19FD2C979F8C9A56.txt', (req, res) => {
+  // Assuming your text file is named 'example.txt' in the root directory
+  const filePath = 'FC86BE2EB996E27F19FD2C979F8C9A56.txt';
+
+  fs.readFile(filePath, 'utf8', (err, data) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Internal Server Error');
+    } else {
+      res.send(data);
+    }
+  });
+});
 
 // Socket.IO server
 let users = {}; // Store users with their socket IDs
@@ -89,7 +106,7 @@ io.on("connection", (socket) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 80;
 
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`Socket.IO Server running on port ${PORT}`);
